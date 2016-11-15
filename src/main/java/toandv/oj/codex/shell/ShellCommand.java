@@ -52,7 +52,8 @@ public class ShellCommand {
         this.waitForFinish = waitForFinish;
     }
 
-    public void exec() {
+    public ShellCommand exec() {
+        this.output = null;
         try {
             process = Runtime.getRuntime().exec(command, args.toArray(new String[args.size()]));
             if (timeout > 0) {
@@ -64,16 +65,19 @@ public class ShellCommand {
         } catch (IOException e) {
             throw new CommandRuntimeException(e);
         }
+        return this;
     }
 
     public String getOutput() {
         if (output == null) {
             StringBuffer buffer = new StringBuffer();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line;
             try {
+                String line = reader.readLine();
+                if (line != null)
+                    buffer.append(line);
                 while ((line = reader.readLine()) != null) {
-                    buffer.append(line + "\n");
+                    buffer.append("\n" + line);
                 }
                 output = buffer.toString();
             } catch (IOException e) {

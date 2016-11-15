@@ -1,5 +1,8 @@
 package toandv.oj.codex;
 
+import toandv.oj.codex.shell.ShellCommand;
+import toandv.oj.codex.shell.ShellCommandChain;
+
 import java.io.*;
 import java.util.concurrent.TimeUnit;
 
@@ -26,15 +29,12 @@ public class CodeSnippet {
             fout.write(hello.getBytes());
             fout.flush();
             fout.close();
-            Process p = Runtime.getRuntime().exec("javac Test.java");
-            p.waitFor();
-            Process p1 = Runtime.getRuntime().exec("java Test");
-            p1.waitFor();
-            InputStream is = p1.getInputStream();
-            int b;
-            while ((b = is.read()) != -1) {
-                System.out.print((char) b);
-            }
+            ShellCommand compileHello = new ShellCommand("javac Test.java").exec();
+            System.out.println(compileHello.getOutput() + "|");
+            ShellCommand runHello = new ShellCommand("java Test").exec();
+            System.out.println(runHello.getOutput() + "|");
+            ShellCommandChain chain = new ShellCommandChain().and(compileHello).and(runHello).exec();
+            System.out.println(chain.getOutputs());
 
         } catch (Exception e) {
             e.printStackTrace();
